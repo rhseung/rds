@@ -1,408 +1,172 @@
-# Makers' Principle
-## Rhseung's Design System (RDS)
+# Makers' Principle: Rhseung's Design System (RDS)
 
-RDS는 그냥 컴포넌트 모음이 아니에요.
-RDS는 **선언적인 UI 문법(Declarative UI, 선언적 UI)**이에요.
+RDS는 단순한 컴포넌트 모음이 아닌, **선언적인 UI 문법(Declarative UI Syntax)**입니다. 
+개발자가 UI의 **구조(Structure)**를 선언하면, 시스템이 **디테일(Detail)**과 **인접 처리(Adjacency)**를 책임집니다.
 
-RDS는 이렇게 작동해요.
+## For React
 
-- UI의 **구조(structure, 구조)**는 개발자가 선언해요.
-- UI의 **디테일(detail, 디테일)**과 **맞물림(adjacency, 인접 처리)**은 시스템이 책임져요.
-- 어떤 브랜드 색상(brand color, 브랜드 색)이어도 안정적으로 동작해요. (Brand-agnostic, 브랜드 독립적)
-- 타입 안정성(type safety, 타입 안전성)을 기본으로 가져요.
+### 1. 선언적 UI와 시스템 책임 (Declarative by Default)
+개발자는 "무엇을 만들고 싶은지"만 명확히 적습니다. "어떻게 구현할지"는 시스템의 몫입니다.
 
-이 문서는 RDS를 설계하고 구현할 때 따라야 하는 **기준(standard, 기준)**이에요.
-
-## 1. 선언적 UI를 기본으로 써요 (Declarative by Default)
-
-RDS에서는 “어떻게 구현하느냐”를 코드에 최대한 적지 않아요.
-대신 “무엇을 만들고 싶은지”만 또렷하게 적어요.
-
-- 개발자는 **무엇을 보여줄지**만 선언해요.
-- **어떻게 보일지**는 시스템이 책임져요.
-
-예시:
+* **디테일 자동화**: `radius`, `border`, `spacing` 등을 개발자가 직접 계산하지 않습니다.
+* **인접 처리(Adjacency)**: 컴포넌트가 서로 맞닿을 때 발생하는 스타일 수정은 시스템이 내부적으로 처리합니다.
 
 ```tsx
-<ButtonGroup>
-	<Button />
-	<Button />
-	<ButtonGroup.Separator />
-	<Button />
+// ✅ 개발자는 구조만 선언합니다.
+<ButtonGroup variant="outline">
+    <Button>왼쪽</Button>
+    <Button>가운데</Button>
+    <ButtonGroup.Separator />
+    <Button>오른쪽</Button>
 </ButtonGroup>
+
+/**
+ * [시스템의 책임]
+ * 1. 첫 번째 버튼: 오른쪽 border-radius 제거
+ * 2. 중간 버튼: 양쪽 border-radius 제거 및 좌측 border 중첩 해결
+ * 3. 구분선(Separator) 뒤의 버튼: 간격 및 경계면 재설정
+ */
 ```
 
-이 코드에서 `radius`, `border`, `spacing` 같은 건 개발자가 신경 쓰지 않아도 돼요.
-버튼끼리 맞닿는 부분의 디테일은 시스템이 알아서 처리해요.
 
-## 2. `props`를 나열해서 UI를 만들지 않아요 (No Prop-Dumping)
 
-RDS에서는 특정 UI를 만들기 위해 `props`를 계속 덧붙이는 방식을 지양해요.
-이 방식은 시간이 지나면 API가 무거워지고, 사용하기 어려워져요.
+### 2. 구조적 슬롯 (Structural Children over Prop-Dumping)
 
-핵심은 이거예요.
+특정 UI 기능을 위해 `props`를 무분별하게 나열하거나 객체 형태로 주입하는 방식을 지양합니다.
 
-- 구조는 `children`으로 표현해요.
-- 구현 디테일은 `props`로 노출하지 않아요.
+#### 2.1 기존 방식의 문제 (Prop-Dumping)
 
-### 2.1 구현 디테일 `props`는 지양해요 (Implementation-detail `props`)
-
-**Implementation-detail `props`(구현 디테일 속성)**은 컴포넌트 내부 레이아웃/위치/스타일 같은 구체적인 구현을 직접 조절하게 만들어요.
-
-예를 들면 이런 것들이에요.
-
-- `startIcon`, `endIcon`
-- `leftAdornment`, `rightAddon`
-- `hasIcon`, `withX` 같은 shortcut `props`
-
-이런 `props`는 선언적 UI를 깨요.
-컴포넌트가 “무엇인지”보다 “어떻게 배치되는지”를 강요하기 때문이에요.
-
-### 2.2 구조는 `children`으로 표현해요 (Structural `children`)
-
-RDS에서는 `children`을 **콘텐츠(content, 내용)**가 아니라 **구조(structure, 구조)**로 봐요.
-
-- `children`으로 슬롯(slot, 자리)을 선언해요.
-- 컴포넌트는 `children`을 해석해서 적절한 레이아웃과 스타일을 만들어요.
-
-이 방식은 API를 가볍게 만들어요.
-그리고 확장성(extensibility, 확장성)도 좋아져요.
-
-참고로, 확장은 보통 이런 도구로 해결해요.
-
-- `children`
-- render `prop` (렌더 `prop`)
-- compound component (복합 컴포넌트)
-
-### 2.3 `TextField.Inner`는 구조적 슬롯이에요 (`TextField.Inner` as a Structural Slot)
-
-`TextField.Inner`는 `TextField` 안에서 **입력 필드(input field, 입력 필드)**가 들어갈 핵심 슬롯이에요.
-
-RDS에서는 입력 영역을 `props`로 조립하지 않아요.
-대신 **슬롯을 `children`으로 드러내요.**
-
-이렇게 하면 이런 점이 좋아요.
-
-- “어디가 입력 영역인지”가 코드에서 바로 보여요.
-- adornment(장식 요소) 개수/위치가 늘어나도 `props`가 폭발하지 않아요.
-- 아이콘이 아니라 임의의 요소도 자연스럽게 들어가요.
-
-예시:
+MUI와 같은 기존 라이브러리는 adornment를 추가할 때 코드가 비대해지고 구조 파악이 어렵습니다.
 
 ```tsx
-<TextField>
-	<SearchIcon />
-	<TextField.Inner />
-	<ClearIcon onClick={clear} />
+// ❌ 비권장: Prop-Dumping (코드가 길어지고 구조가 감춰짐)
+<TextField
+  label="검색"
+  InputProps={{
+    startAdornment: (
+      <InputAdornment position="start">
+        <SearchIcon />
+      </InputAdornment>
+    ),
+    endAdornment: (
+      <IconButton onClick={clear}><ClearIcon /></IconButton>
+    ),
+  }}
+/>
+```
+
+#### 2.2 RDS의 해결책: Structural Slots
+
+`children`을 '내용'이 아닌 '구조'로 취급합니다. 슬롯을 밖으로 드러내어 직관적인 레이아웃을 구성합니다.
+
+```tsx
+// ✅ 권장: RDS의 선언적 슬롯 (구조가 한눈에 보이며 확장이 자유로움)
+<TextField placeholder="검색어를 입력하세요">
+    <SearchIcon />
+    <TextField.Inner />
+    <ClearIcon onClick={clear} />
 </TextField>
 ```
 
-### 2.4 `children`은 구조예요 (`children` are Structure)
 
-RDS에서 `children`은 “내용”이 아니라 “구조”예요.
-컴포넌트는 `children`을 분석하고, 필요한 구조로 재배치해요.
 
-이것이 RDS의 핵심 원칙 중 하나입니다: **`children` = 구조(structure)**.
+### 3. 시스템 속성의 전파 (System Prop Propagation)
 
-## 3. 선언적 UI는 컴포넌트를 과하게 쪼개는 게 아니에요 (Declarative UI ≠ Over-Componentization)
+`size`, `intent`와 같은 시스템 `prop`은 하위 요소로 자동 전파되어 코드 반복을 줄입니다.
 
-선언적이라는 이유로 모든 책임을 컴포넌트 트리 안에 넣지 않아요.
-RDS는 책임(responsibility, 책임)을 분리해요.
-
-### 3.1 View와 Control을 분리해요 (View vs Control Responsibility Split)
-
-- View(뷰)는 “보여주는 것”만 책임져요.
-- Control(제어)은 “열고/닫고/전환하는 것”을 책임져요.
-
-트리거(trigger, 트리거)는 보통 비즈니스 로직에 가까워요.
-그래서 View 컴포넌트가 트리거를 소유하지 않아요.
-
-### 3.2 왜 `Modal.Trigger`는 권장하지 않아요? (Why `Modal.Trigger` Is Discouraged)
-
-비권장:
+* **자동 감지**: 부모의 속성을 자식이 Context를 통해 감지하여 스스로를 최적화합니다.
+* **우선순위**: 자식 요소에 명시된 속성이 부모의 전파값보다 항상 우선합니다.
 
 ```tsx
-<Modal.Root>
-	<Modal.Trigger>
-		<Button />
-	</Modal.Trigger>
-</Modal.Root>
-```
-
-권장:
-
-```tsx
-<Button onClick={() => overlay.open(() => <Modal />)} />
-```
-
-`Modal.Root` 같은 View 컴포넌트가 트리거까지 책임지면, Modal이 너무 많은 책임을 가져요.
-RDS는 “뷰는 뷰답게” 유지해요.
-
-## 4. `props`는 의미(semantic)만 담아요 (Semantic-only `props`)
-
-RDS에서 `props`는 **의미(semantic, 의미)**와 **시스템 제어(system control, 시스템 제어)**만 담아요.
-
-허용하는 `props` 예시:
-
-- `variant`
-- `size`
-- `intent` / `tone`
-- `disabled`, `loading`, `invalid`, `readOnly`
-- `value`, `onChange`, `name`
-- `aria-*`
-- `className` (보강 용도)
-- `style` (런타임 측정/애니메이션 등 불가피한 경우만)
-
-지양하는 `props` 예시:
-
-- 위치/레이아웃/구현 디테일을 제어하는 `props`
-- 조합을 대신하는 shortcut `props`
-
-## 5. 시스템 `prop`은 자동으로 전파돼요 (System Prop Propagation)
-
-Section 7에서는 Section 4에서 정의한 시스템 `props`의 런타임 동작 방식을 설명해요.
-
-### 5.1 `size` 전파 규칙이에요 (Size Propagation Rules)
-
-`size`는 시스템 `prop`이에요.
-그래서 하위 요소로 자동 전파돼요.
-
-예시:
-
-```tsx
+// ✅ IconSun은 Button의 'md' 사이즈를 자동으로 감지합니다.
 <Button size="md">
-	<IconSun />
-	라이트 모드
+    <IconSun /> 
+    라이트 모드
 </Button>
+
+// 복합 구조에서의 전파
+<ButtonGroup size="lg">
+    <Button>대형 버튼</Button>
+    <Button size="sm">나만 소형 버튼</Button> {/* 자식 설정이 우선됨 */}
+</ButtonGroup>
 ```
 
-- child가 `size`를 직접 적으면 child가 우선이에요.
 
-### 5.2 전파는 경계가 있어요 (Propagation Boundaries)
 
-전파는 아무 데나 퍼지지 않아요.
-RDS가 관리하는 컴포넌트에만 전파돼요.
+### 4. 관심사의 분리 (View vs Control)
 
-## 6. 의미 없는 `div`는 줄여요 (Layout System)
+View 컴포넌트가 트리거(제어 로직)를 소유하지 않도록 분리하여 책임 소재를 명확히 합니다.
 
-`div`로만 레이아웃을 쌓으면 의도가 사라져요.
-RDS는 의도를 드러내는 레이아웃 컴포넌트를 제공해요.
+* **View**: "어떻게 보이는가"만 책임집니다.
+* **Control**: "언제 열리고 닫히는가"는 비즈니스 로직(예: Overlay 매니저)이 결정합니다.
 
-### 6.1 레이아웃 프리미티브예요 (Layout Primitives)
+```tsx
+// ❌ 비권장: Modal이 트리거까지 책임지는 구조
+<Modal.Root>
+    <Modal.Trigger><Button>열기</Button></Modal.Trigger>
+</Modal.Root>
 
-- `Box` — 최소 단위 래퍼
-- `HStack` / `VStack` / `ZStack` — 흐름 / 겹침
-- `Flex` — 일반 flexbox
-- `Grid` — 2D 레이아웃
+// ✅ 권장: 트리거는 외부 비즈니스 로직에서 관리
+const { open } = useOverlay();
+<Button onClick={() => open(() => <MyModal />)} />
+```
 
-### 6.2 책임을 나눠요 (Responsibility Split)
 
-- `Box`: 단일 영역 스타일
-- `Stack`: 1D 흐름
-- `Flex`: 일반 flex
-- `Grid`: 2D 배치
-- `Group`: 인접 관계 규칙
-- `Composite`: 구조적 UI
 
-## 7. 스타일은 Tailwind로만 써요 (Tailwind-first Styling)
+### 5. 레이아웃 시스템 (Layout Primitives)
 
-### 7.1 기본은 Tailwind예요 (Tailwind-first)
+의미 없는 `div`를 줄이고, 레이아웃의 의도를 명확히 드러내는 프리미티브를 사용합니다.
 
-RDS는 Tailwind CSS만 사용해요.
-CSS-in-JS, inline `style`은 기본적으로 쓰지 않아요.
+* **Zero Margin Rule**: 모든 원자 컴포넌트(Button, Input 등)는 외곽 마진이 0입니다. 간격은 레이아웃 컴포넌트가 책임집니다.
+* **Primitives**: `Box`, `HStack/VStack`, `Flex`, `Grid`, `Group`.
 
-### 7.2 `style`은 예외적으로만 써요 (Runtime Style Exceptions)
 
-아래 경우에만 `style`을 허용해요.
 
-- 런타임 측정 값
-- 애니메이션 중간값
-- canvas / overlay positioning
+### 6. 브랜드 독립적 설계 (Brand-agnostic)
 
-## 8. variant 시스템은 `tailwind-variants(tv)`만 써요 (Variant System)
+특정 브랜드 색상에 의존하지 않고 시스템적으로 안정적인 시각 피드백을 제공합니다.
 
-- 클래스 조합은 `tailwind-variants(tv)`만 사용해요.
-- `cva`는 쓰지 않아요.
-- `variant` / `size` / `state`는 전부 `tv()` 안에서 정의해요.
+* **Semantic Tokens**: `bg-[#58c1c8]` 같은 하드코딩 대신 `bg-primary` 토큰만 사용합니다.
+* **State Layering**: hover/active 상태 시 색상을 직접 변경하지 않고, 그 위에 **State Mask(투명도 레이어)**를 얹습니다. 이는 어떤 브랜드 색상 위에서도 일관된 상태 표현을 가능하게 합니다.
 
-## 9. 브랜드 색상에 상관없이 예쁘게 만들어요 (Brand-agnostic by Construction)
 
-### 9.1 색상은 semantic token만 써요 (Semantic Tokens Only)
 
-컴포넌트는 브랜드 색을 직접 참조하지 않아요.
-오직 semantic token만 사용해요.
+### 7. 타입 안전성과 네임스페이스 (Type System)
 
-허용:
+RDS는 개발자 경험(DX)을 위해 TypeScript의 **Namespace Merging**을 표준으로 사용합니다.
 
-- `bg-primary`
-- `text-primary-foreground`
-
-금지:
-
-- `bg-[#58c1c8]`
-- `text-[var(--brand)]`
-
-### 9.2 상태는 색을 바꾸지 않아요 (State Layer over Color Mutation)
-
-hover / active / pressed 상태는 base color를 바꾸지 않아요.
-
-대신 이렇게 해요.
-
-- 동일한 색 위에 state mask layer를 얹어요.
-- `opacity`로 강도만 조절해요.
-
-이 방식이 좋은 이유는 간단해요.
-
-- 브랜드 색이 바뀌어도 상태 표현이 일관돼요.
-- state별 bg/fg 토큰이 끝없이 늘어나는 걸 막아요.
-
-### 9.3 강제로 지켜요 (Lint & Enforcement)
-
-- `eslint-plugin-tailwindcss`
-- `tailwindcss/no-arbitrary-value` 활성화
-- `arbitrary color value` 전면 금지
-
-## 10. 타입은 완전히 안전해야 해요 (Type System Principle)
-
-### 10.1 완전한 타입 안정성이 기본이에요 (Fully Type-safe)
-
-RDS 컴포넌트는 전부 타입 안전하게 만들어야 해요.
-
-### 10.2 타입은 컴포넌트에 붙어 있어야 해요 (Component-scoped Types)
-
-모든 컴포넌트는 아래 타입을 공개해요.
-
-- `{Component}.Props`
-- `{Component}.State`
-
-이건 RDS의 공개 타입 계약(public type contract, 공개 타입 계약)이에요.
-
-### 10.3 네임스페이스 병합으로 타입을 붙여요 (Namespace Merging)
-
-RDS는 TypeScript의 **namespace merging(네임스페이스 병합)**을 사용해서,
-컴포넌트 식별자(identifier, 식별자)에 타입을 붙여요.
-
-이 방식이 좋은 이유예요.
-
-- 타입을 따로 export/import 하지 않아도 돼요.
-- IDE 자동 완성이 잘 돼요. (discoverability, 탐색성)
-- 런타임 코드는 단순해요.
-- DX(Developer Experience, 개발자 경험)가 좋아져요.
-
-예시:
+* **Public Contract**: 모든 컴포넌트는 `{Component}.Props`와 `{Component}.State`를 공개합니다.
+* **탐색성(Discoverability)**: IDE에서 `TextField.`을 입력하는 것만으로 사용 가능한 모든 서브 컴포넌트와 타입을 탐색할 수 있습니다.
 
 ```ts
-export function Button(props: Button.Props) {
-	// ...
-	return null
-}
+export function Button(props: Button.Props) { ... }
 
 export namespace Button {
-	export type Props = {
-		size?: 'sm' | 'md' | 'lg'
-		disabled?: boolean
-	}
-
-	export type State = {
-		focused: boolean
-		pressed: boolean
-	}
+    export type Props = { size?: 'sm' | 'md' | 'lg'; ... };
+    export type State = { pressed: boolean; ... };
 }
-
-type P = Button.Props
-type S = Button.State
 ```
 
-이 패턴은 “구현 트릭”이 아니에요.
-RDS의 공개 API 계약이에요.
 
-## 11. `Skeleton`은 단순하게도, 편하게도 써요 (Skeleton)
 
-`Skeleton`은 두 방식 모두 지원해요.
+### 8. 다형성 표준 (Polymorphism: asChild)
 
-- `width` / `height` / `shape`로 단순하게 쓸 수 있어요.
-- `children`을 넣으면 그 형태를 그대로 skeleton으로 만들어요.
-
-`children` 기반 방식에서는,
-원본 요소를 `invisible`로 렌더링해서 레이아웃을 잡아요.
-
-예시:
+타입 안전성을 저해하고 `props` 충돌을 일으키는 `as` 속성 대신, **`asChild`** 패턴을 사용합니다.
 
 ```tsx
-<Skeleton>
-	<Button size="md">로딩</Button>
-</Skeleton>
-```
-
-## 12. Storybook으로 품질을 확인해요 (Quality Gate)
-
-모든 public 컴포넌트는 Storybook을 지원해야 해요.
-
-- `size` / `variant` / `state` 조합을 보여줘야 해요.
-- light / dark / brand 테마로 시각 회귀 테스트를 해야 해요.
-
-## 13. 진입장벽은 낮아야 해요 (Low Entry Barrier & Native-first)
-
-RDS는 배우기 어렵지 않아야 해요.
-그래서 HTML/React의 기본 mental model을 최대한 살려요.
-
-### 13.1 HTML 기능은 그대로 지원해요 (Native-first)
-
-HTML primitive의 기능을 숨기거나 이름을 바꾸지 않아요.
-
-예시:
-
-```tsx
-<TextField type="email" />
-<TextField type="password" />
-<TextField type="date" />
-```
-
-### 13.2 `type`으로 더 좋은 UI를 제공해요 (Smart Enhancement via `type`)
-
-`type`만으로는 UX가 부족한 경우가 있어요.
-그럴 때 RDS는 내부 구현을 더 좋은 컴포넌트로 바꿔요.
-
-예:
-
-- `type="date"` → `DateTimePicker`
-- `type="color"` → `ColorPicker`
-
-API는 그대로 유지해요.
-구현만 더 똑똑해져요.
-
-### 13.3 자동화는 항상 끌 수 있어요 (Opt-out & No Surprise)
-
-자동화는 편의 기능이에요.
-그래서 언제든 opt-out할 수 있어야 해요.
-그리고 동작이 예상 가능해야 해요.
-
-## 14. 다형성은 `asChild`로 해요 (Polymorphism: `asChild`)
-
-이 패턴은 Section 3에서 말한 책임 분리 원칙의 구체적인 구현 방식이에요.
-
-`as`는 타입 안전성을 해치기 쉬워요.
-그래서 RDS는 `asChild` 패턴을 표준으로 사용해요.
-
-예시:
-
-```tsx
+// ✅ <a> 태그의 기능을 유지하면서 Button의 스타일을 안전하게 입힘
 <Button asChild>
-	<a href="/docs">문서</a>
+    <a href="/docs">문서 읽기</a>
 </Button>
 ```
 
-이 방식은 좋아요.
 
-- child 타입을 그대로 유지해요.
-- 커스텀 컴포넌트도 자연스럽게 지원돼요.
-- `props` 충돌이 없어요.
-- `ref` 전달도 안정적이에요.
 
-`as="a"` 같은 API는 RDS 표준에서 사용하지 않아요.
+### 9. 하이엔드 기본 경험 (Native-first)
 
-## 15. 마지막 원칙이에요 (Final Principle)
+* **HTML 준수**: `type="password"`, `type="date"` 등 기본 HTML 속성을 가리지 않고 지원합니다.
+* **Smart Enhancement**: 인터페이스는 유지하되, 필요시 내부적으로 더 고도화된 UI(예: Custom DatePicker)로 대체 렌더링합니다.
 
-RDS는 사용자를 귀찮게 하지 않아요.
-디테일은 시스템이 책임져요.
-사용자는 선언만 하면 돼요.
+## For Flutter
+
+## For SwiftUI
