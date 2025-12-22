@@ -2,9 +2,7 @@
 
 ## Makers' Principle
 
-### For frontend
-
-[Makers' Principle](./PRINCIPLE.md)
+See [Makers' Principle](./PRINCIPLE.md)
 
 ## Commit messages
 
