@@ -1,5 +1,9 @@
 # Rhseung's Design System, RDS
 
+## Makers' Principle
+
+See [Makers' Principle](./PRINCIPLE.md)
+
 ## Commit messages
 
 Commit messages should follow this format:
@@ -10,7 +14,6 @@ Commit messages should follow this format:
 
 - Use the imperative mood for `<title>` (e.g. add, fix, update)
 
----
 
 ### `<type>` is one of the following:
 
@@ -23,8 +26,6 @@ Commit messages should follow this format:
 - `chore`: Maintenance tasks that don’t affect runtime behavior
 - `ci`: Changes to CI/CD configuration
 
----
-
 ### `<domain>` is one of the following:
 
 - `frontend`: User-facing UI and client-side logic
@@ -36,8 +37,6 @@ Commit messages should follow this format:
 - `product`: Product requirements, specs, and planning
 - `ai`: AI-assisted development, agent rules, prompts, or model-related work
 
----
-
 ### Examples
 
 feat(frontend): add onboarding flow  
@@ -45,8 +44,6 @@ fix(backend): handle null user session
 docs(ai): add AGENTS.md  
 chore(infra): update deployment config  
 ci(infra): optimize CI pipeline  
-
----
 
 ## Pull request titles
 
