@@ -1,13 +1,14 @@
-import js from '@eslint/js'
-import importPlugin from 'eslint-plugin-import'
-import prettierPlugin from 'eslint-plugin-prettier/recommended'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import storybook from 'eslint-plugin-storybook'
-import globals from 'globals'
-import tseslint from 'typescript-eslint'
+import js from '@eslint/js';
+import importPlugin from 'eslint-plugin-import';
+import prettierPlugin from 'eslint-plugin-prettier/recommended';
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
+import storybook from 'eslint-plugin-storybook';
+import globals from 'globals';
+import { defineConfig } from 'eslint/config';
+import tseslint from 'typescript-eslint';
 
-export default tseslint.config(
+export default defineConfig(
   { ignores: ['dist'] },
   {
     extends: [
@@ -68,4 +69,4 @@ export default tseslint.config(
   {
     extends: [...storybook.configs['flat/recommended']],
   },
-)
+);
