@@ -14,7 +14,6 @@ Commit messages should follow this format:
 
 - Use the imperative mood for `<title>` (e.g. add, fix, update)
 
-
 ### `<type>` is one of the following:
 
 - `feat`: Introduces a new feature or capability
@@ -43,7 +42,7 @@ feat(frontend): add onboarding flow
 fix(backend): handle null user session  
 docs(ai): add AGENTS.md  
 chore(infra): update deployment config  
-ci(infra): optimize CI pipeline  
+ci(infra): optimize CI pipeline
 
 ## Pull request titles
 
