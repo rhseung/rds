@@ -5,6 +5,11 @@ const config = {
   semi: false,
   singleQuote: true,
   trailingComma: "all",
+  plugins: [
+    'prettier-plugin-tailwindcss',
+  ],
+  tailwindFunctions: ['clsx', 'cn', 'twMerge', 'tv', 'cva'],
+  tailwindPreserveWhiteSpace: false
 };
 
 export default config;
